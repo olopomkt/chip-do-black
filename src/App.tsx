@@ -625,7 +625,6 @@ export default function App() {
                       <div className="mb-8">
                         <span className="text-sm text-slate-400">R$</span>
                         <span className="text-5xl font-black text-white ml-1">{plan.price}</span>
-                        <span className="text-sm text-slate-400">/mês</span>
                       </div>
 
                       <ul className="space-y-4 mb-8 text-left text-sm text-slate-300 flex-1">
@@ -658,6 +657,13 @@ export default function App() {
                 </p>
               </div>
             )}
+
+            <button
+              onClick={() => setCurrentStepIndex(STEPS.indexOf('q_chips_to_warm'))}
+              className="mt-8 text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium underline underline-offset-4"
+            >
+              Ver outra oferta (Alterar quantidade de chips)
+            </button>
           </motion.div>
         );
       }
