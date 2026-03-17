@@ -108,6 +108,10 @@ export default function App() {
 
   const nextStep = () => {
     if (currentStepIndex < STEPS.length - 1) {
+      if (STEPS[currentStepIndex] === 'q_chips_to_warm' && termsAccepted && leadName) {
+        setCurrentStepIndex(STEPS.indexOf('checkout_redirect'));
+        return;
+      }
       setCurrentStepIndex(prev => prev + 1);
     }
   };
@@ -655,7 +659,7 @@ export default function App() {
         const chips = answers['chips_to_warm'] || 'Até 2 números';
         
         let plans = [];
-        let extraInstancePrice = 0;
+        const extraInstancePrice = 27;
 
         if (chips === 'Até 2 números') {
           plans = [
@@ -663,21 +667,18 @@ export default function App() {
             { name: 'Profissional', days: '5 dias', price: 77 },
             { name: 'Intensivo', days: '7 dias', price: 107 }
           ];
-          extraInstancePrice = 27;
         } else if (chips === 'Até 4 números') {
           plans = [
             { name: 'Essencial', days: '3 dias', price: 87 },
             { name: 'Profissional', days: '5 dias', price: 117 },
             { name: 'Intensivo', days: '7 dias', price: 147 }
           ];
-          extraInstancePrice = 37;
         } else if (chips === 'Até 8 números') {
           plans = [
             { name: 'Essencial', days: '3 dias', price: 127 },
             { name: 'Profissional', days: '5 dias', price: 157 },
             { name: 'Intensivo', days: '7 dias', price: 187 }
           ];
-          extraInstancePrice = 57;
         }
 
         return (
@@ -697,7 +698,7 @@ export default function App() {
             <div className="w-full space-y-8 mt-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {plans.map((plan, idx) => (
-                    <div key={idx} className={`bg-slate-900 border ${plan.name === 'Profissional' ? 'md:-translate-y-4' : 'border-slate-700'} rounded-2xl p-6 md:p-8 flex flex-col relative transition-transform duration-1000`} style={plan.name === 'Profissional' ? { borderColor: 'var(--theme-color)', boxShadow: '0 0 30px var(--theme-glow)' } : {}}>
+                    <div key={idx} className={`bg-slate-900 border ${plan.name === 'Profissional' ? 'md:-translate-y-4 flame-effect' : 'border-slate-700'} rounded-2xl p-6 md:p-8 flex flex-col relative transition-transform duration-1000`}>
                       {plan.name === 'Profissional' && (
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-slate-900 text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider transition-colors duration-1000" style={{ backgroundColor: 'var(--theme-color)' }}>
                           Mais Escolhido
