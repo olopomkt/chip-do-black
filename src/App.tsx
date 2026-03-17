@@ -5,8 +5,6 @@ import { ChevronRight, ShieldAlert, PlayCircle, CheckCircle2, AlertTriangle, Shi
 
 type Step = 
   | 'cover'
-  | 'q_traffic_exp'
-  | 'q_product_type'
   | 'q_role'
   | 'q_operation_type'
   | 'q_chips_current'
@@ -17,12 +15,11 @@ type Step =
   | 'q_frequency'
   | 'q_chips_to_warm'
   | 'terms_agreement'
+  | 'lead_capture'
   | 'checkout_redirect';
 
 const STEPS: Step[] = [
   'cover',
-  'q_traffic_exp',
-  'q_product_type',
   'q_role',
   'q_operation_type',
   'q_chips_current',
@@ -33,6 +30,7 @@ const STEPS: Step[] = [
   'q_frequency',
   'q_chips_to_warm',
   'terms_agreement',
+  'lead_capture',
   'checkout_redirect'
 ];
 
@@ -42,9 +40,71 @@ export default function App() {
   const [termsName, setTermsName] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [leadName, setLeadName] = useState('');
+  const [leadEmail, setLeadEmail] = useState('');
+  const [leadPhone, setLeadPhone] = useState('');
 
   const currentStep = STEPS[currentStepIndex];
-  const progress = ((currentStepIndex) / (STEPS.length - 1)) * 100;
+  const progress = (currentStepIndex / (STEPS.length - 1)) * 100;
+  
+  const getThemeVars = (stepIndex: number) => {
+    if (stepIndex <= 2) {
+      // Azul (Frio)
+      return {
+        '--theme-bg': '#060d13',
+        '--theme-color': '#00bfff',
+        '--theme-color-light': '#80dfff',
+        '--theme-color-dark': '#0059b3',
+        '--theme-glow': 'rgba(0, 191, 255, 0.3)',
+        '--theme-glow-strong': 'rgba(0, 191, 255, 0.5)',
+        '--theme-glow-light': 'rgba(0, 191, 255, 0.1)',
+      };
+    } else if (stepIndex <= 4) {
+      // Azul Escuro / Quase Preto
+      return {
+        '--theme-bg': '#050a14',
+        '--theme-color': '#1a2639',
+        '--theme-color-light': '#2c3e50',
+        '--theme-color-dark': '#0d131c',
+        '--theme-glow': 'rgba(26, 38, 57, 0.3)',
+        '--theme-glow-strong': 'rgba(26, 38, 57, 0.5)',
+        '--theme-glow-light': 'rgba(26, 38, 57, 0.1)',
+      };
+    } else if (stepIndex <= 6) {
+      // Marrom Escuro
+      return {
+        '--theme-bg': '#140a00',
+        '--theme-color': '#5c2e00',
+        '--theme-color-light': '#8a4500',
+        '--theme-color-dark': '#2e1700',
+        '--theme-glow': 'rgba(92, 46, 0, 0.3)',
+        '--theme-glow-strong': 'rgba(92, 46, 0, 0.5)',
+        '--theme-glow-light': 'rgba(92, 46, 0, 0.1)',
+      };
+    } else if (stepIndex <= 9) {
+      // Laranja Escuro (Quente)
+      return {
+        '--theme-bg': '#1a0a00',
+        '--theme-color': '#e65c00',
+        '--theme-color-light': '#ff8533',
+        '--theme-color-dark': '#993d00',
+        '--theme-glow': 'rgba(230, 92, 0, 0.3)',
+        '--theme-glow-strong': 'rgba(230, 92, 0, 0.5)',
+        '--theme-glow-light': 'rgba(230, 92, 0, 0.1)',
+      };
+    } else {
+      // Laranja Brilhante (Muito Quente)
+      return {
+        '--theme-bg': '#1a0800',
+        '--theme-color': '#ff6600',
+        '--theme-color-light': '#ff994d',
+        '--theme-color-dark': '#b34700',
+        '--theme-glow': 'rgba(255, 102, 0, 0.3)',
+        '--theme-glow-strong': 'rgba(255, 102, 0, 0.5)',
+        '--theme-glow-light': 'rgba(255, 102, 0, 0.1)',
+      };
+    }
+  };
 
   const nextStep = () => {
     if (currentStepIndex < STEPS.length - 1) {
@@ -75,12 +135,13 @@ export default function App() {
               </h2>
               <p className="text-blue-200/80 text-lg leading-relaxed">
                 Diminua drasticamente as chances de bloqueio e suspensão do seu número. 
-                Aqueça seus chips com uma automação inteligente e venda mais no 1x1 sem interrupções.
+                Aqueça seus números do WhatsApp com uma automação inteligente e venda mais no 1x1 sem interrupções.
               </p>
             </div>
             <button 
               onClick={nextStep}
-              className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full font-bold text-lg text-white overflow-hidden shadow-[0_0_40px_rgba(0,240,255,0.3)] hover:shadow-[0_0_60px_rgba(0,240,255,0.5)] transition-all duration-300"
+              className="group relative px-8 py-4 rounded-full font-bold text-lg text-white overflow-hidden transition-all duration-300"
+              style={{ backgroundColor: 'var(--theme-color)', boxShadow: '0 0 40px var(--theme-glow)' }}
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
               <span className="relative flex items-center gap-2">
@@ -89,36 +150,6 @@ export default function App() {
             </button>
           </motion.div>
         );
-
-      case 'q_traffic_exp':
-        return <QuestionStep 
-          key="q_traffic_exp"
-          question="Você utiliza tráfego pago hoje? Qual seu nível de experiência?"
-          options={[
-            "Iniciante (Começando agora)",
-            "Intermediário (Já rodo campanhas)",
-            "Avançado (Escalando operações)",
-            "Não utilizo tráfego pago"
-          ]}
-          onSelect={(ans) => handleAnswer('traffic_exp', ans)}
-          selected={answers['traffic_exp']}
-        />;
-
-      case 'q_product_type':
-        return <QuestionStep 
-          key="q_product_type"
-          question="Que tipo de produto você vende?"
-          options={[
-            "PDF / PLR",
-            "Cursos / Treinamentos",
-            "Encapsulados",
-            "Produtos Físicos",
-            "Serviços",
-            "Outros"
-          ]}
-          onSelect={(ans) => handleAnswer('product_type', ans)}
-          selected={answers['product_type']}
-        />;
 
       case 'q_role':
         return <QuestionStep 
@@ -151,13 +182,13 @@ export default function App() {
       case 'q_chips_current':
         return <QuestionStep 
           key="q_chips_current"
-          question="Quantos chips você já utiliza aquecidos no momento para suas operações?"
+          question="Quantos números do WhatsApp você já utiliza aquecidos no momento para suas operações?"
           options={[
             "Nenhum no momento",
-            "1 a 5 chips",
-            "6 a 10 chips",
-            "11 a 20 chips",
-            "Mais de 20 chips"
+            "1 a 5 números",
+            "6 a 10 números",
+            "11 a 20 números",
+            "Mais de 20 números"
           ]}
           onSelect={(ans) => handleAnswer('chips_current', ans)}
           selected={answers['chips_current']}
@@ -179,7 +210,7 @@ export default function App() {
               Muito interessante a sua operação!
             </h2>
             <p className="text-xl text-slate-300 max-w-2xl leading-relaxed">
-              O aquecimento de chip por WhatsApp é extremamente importante pra evitar complicações futuras. Veja só como funciona:
+              O aquecimento de números do WhatsApp é extremamente importante pra evitar complicações futuras. Veja só como funciona:
             </p>
             <button 
               onClick={nextStep}
@@ -336,12 +367,11 @@ export default function App() {
       case 'q_warmup_days':
         return <QuestionStep 
           key="q_warmup_days"
-          question="Quantos dias você quer ficar aquecendo o chip?"
+          question="Quantos dias você quer ficar aquecendo o número do WhatsApp?"
           options={[
             "3 dias",
             "5 dias",
-            "7 dias",
-            "10 dias"
+            "7 dias"
           ]}
           onSelect={(ans) => handleAnswer('warmup_days', ans)}
           selected={answers['warmup_days']}
@@ -363,12 +393,11 @@ export default function App() {
       case 'q_chips_to_warm':
         return <QuestionStep 
           key="q_chips_to_warm"
-          question="Quantos chips você pretende aquecer com nossa automação?"
+          question="Quantos números do WhatsApp você pretende aquecer com nossa automação?"
           options={[
-            "Até 2 chips",
-            "Até 4 chips",
-            "Até 8 chips",
-            "Acima de 8 chips"
+            "Até 2 números",
+            "Até 4 números",
+            "Até 8 números"
           ]}
           onSelect={(ans) => handleAnswer('chips_to_warm', ans)}
           selected={answers['chips_to_warm']}
@@ -385,9 +414,9 @@ export default function App() {
               className="flex flex-col w-full max-w-3xl mx-auto space-y-6"
             >
               <div className="text-center space-y-2 mb-2">
-                <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+                <ShieldAlert className="w-12 h-12 mx-auto mb-4 transition-colors duration-1000" style={{ color: 'var(--theme-color)' }} />
                 <h2 className="text-2xl md:text-3xl font-bold text-white">Termo de Responsabilidade e Ciência de Riscos</h2>
-                <p className="text-amber-500/80 text-sm font-bold uppercase tracking-widest">Leitura e Aceite Obrigatórios</p>
+                <p className="text-sm font-bold uppercase tracking-widest transition-colors duration-1000" style={{ color: 'var(--theme-color-light)' }}>Leitura e Aceite Obrigatórios</p>
               </div>
 
               <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 md:p-8 space-y-6 shadow-2xl">
@@ -395,9 +424,9 @@ export default function App() {
                   <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none"></div>
                   <h3 className="text-white font-bold text-lg mb-4">1. OBJETO DO TERMO</h3>
                   <p className="mb-4">
-                    O presente termo tem como objetivo estabelecer as condições, limitações e isenções de responsabilidade referentes ao uso do sistema de automação e aquecimento de chips de WhatsApp denominado "CHIP DO BLACK".
+                    O presente termo tem como objetivo estabelecer as condições, limitações e isenções de responsabilidade referentes ao uso do sistema de automação e aquecimento de números de WhatsApp denominado "CHIP DO BLACK".
                   </p>
-                  <p className="text-amber-500/80 text-xs font-bold uppercase tracking-widest mt-8 text-center">
+                  <p className="text-xs font-bold uppercase tracking-widest mt-8 text-center transition-colors duration-1000" style={{ color: 'var(--theme-color-light)' }}>
                     Clique no botão abaixo para ler o termo completo
                   </p>
                 </div>
@@ -445,7 +474,7 @@ export default function App() {
                         <CheckCircle2 className="absolute w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
                       </div>
                       <span className="text-sm text-slate-400 leading-relaxed">
-                        Declaro que li integralmente o Termo de Responsabilidade acima, compreendo os riscos de bloqueio inerentes ao uso de API Não Oficial e <strong>isento totalmente o CHIP DO BLACK de qualquer responsabilidade</strong> sobre a perda de chips ou prejuízos decorrentes.
+                        Declaro que li integralmente o Termo de Responsabilidade acima, compreendo os riscos de bloqueio inerentes ao uso de API Não Oficial e <strong>isento totalmente o CHIP DO BLACK de qualquer responsabilidade</strong> sobre a perda de números ou prejuízos decorrentes.
                       </span>
                     </label>
                   </motion.div>
@@ -455,7 +484,8 @@ export default function App() {
               <button 
                 onClick={nextStep}
                 disabled={!termsAccepted || termsName.trim().length < 5}
-                className="w-full py-5 bg-amber-500 hover:bg-amber-400 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed rounded-xl font-bold text-slate-900 transition-all shadow-[0_0_20px_rgba(245,158,11,0.2)] disabled:shadow-none uppercase"
+                className="w-full py-5 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed rounded-xl font-bold text-white transition-all disabled:shadow-none uppercase"
+                style={(!termsAccepted || termsName.trim().length < 5) ? {} : { backgroundColor: 'var(--theme-color)', boxShadow: '0 0 20px var(--theme-glow)' }}
               >
                 {termsAccepted && termsName.trim().length >= 5 ? 'Assinado - Finalizar' : 'Assine o termo para continuar'}
               </button>
@@ -485,27 +515,27 @@ export default function App() {
                     
                     <div className="p-5 md:p-8 overflow-y-auto custom-scrollbar text-slate-700 space-y-6 text-sm md:text-base bg-white leading-relaxed">
                       <h3 className="text-slate-900 font-bold text-lg">1. OBJETO DO TERMO</h3>
-                      <p>O presente termo tem como objetivo estabelecer as condições, limitações e isenções de responsabilidade referentes ao uso do sistema de automação e aquecimento de chips de WhatsApp denominado "CHIP DO BLACK". Ao prosseguir, o usuário declara ter lido, compreendido e aceito integralmente todas as cláusulas aqui dispostas.</p>
+                      <p>O presente termo tem como objetivo estabelecer as condições, limitações e isenções de responsabilidade referentes ao uso do sistema de automação e aquecimento de números de WhatsApp denominado "CHIP DO BLACK". Ao prosseguir, o usuário declara ter lido, compreendido e aceito integralmente todas as cláusulas aqui dispostas.</p>
 
                       <h3 className="text-slate-900 font-bold text-lg mt-8">2. NATUREZA DA TECNOLOGIA E RISCOS INERENTES</h3>
                       <p><strong>2.1. Uso de API Não Oficial:</strong> O usuário declara estar ciente de que o serviço prestado utiliza a "API Não Oficial" do WhatsApp. Esta tecnologia, embora permita automação em escala e redução de custos, opera à margem das diretrizes oficiais da Meta (empresa controladora do WhatsApp).</p>
-                      <p><strong>2.2. Risco de Suspensão:</strong> Fica expressamente estabelecido que <strong>NÃO EXISTE GARANTIA DE 100% DE IMUNIDADE</strong> contra bloqueios, banimentos ou suspensões de números (chips) utilizados na plataforma. O WhatsApp atualiza seus algoritmos de detecção de spam e automação de forma contínua e imprevisível.</p>
+                      <p><strong>2.2. Risco de Suspensão:</strong> Fica expressamente estabelecido que <strong>NÃO EXISTE GARANTIA DE 100% DE IMUNIDADE</strong> contra bloqueios, banimentos ou suspensões de números utilizados na plataforma. O WhatsApp atualiza seus algoritmos de detecção de spam e automação de forma contínua e imprevisível.</p>
 
                       <h3 className="text-slate-900 font-bold text-lg mt-8">3. NOSSO COMPROMISSO E LIMITAÇÕES</h3>
                       <p><strong>3.1. Mitigação de Riscos:</strong> O CHIP DO BLACK compromete-se a fornecer tecnologia de ponta, incluindo inteligência artificial para simulação de comportamento humano, lógicas complexas de delay e uso de proxies rotativos, com o objetivo de minimizar exponencialmente as chances de bloqueio em comparação com automações amadoras.</p>
-                      <p><strong>3.2. Ausência de Garantia de Resultado:</strong> A mitigação de riscos mencionada na cláusula 3.1 <strong>NÃO CONSTITUI PROMESSA OU GARANTIA</strong> de que o número não será banido. O bloqueio pode ocorrer independentemente da qualidade da automação, motivado por denúncias de usuários, histórico do IP, qualidade do chip ou mudanças abruptas nas políticas da Meta.</p>
+                      <p><strong>3.2. Ausência de Garantia de Resultado:</strong> A mitigação de riscos mencionada na cláusula 3.1 <strong>NÃO CONSTITUI PROMESSA OU GARANTIA</strong> de que o número não será banido. O bloqueio pode ocorrer independentemente da qualidade da automação, motivado por denúncias de usuários, histórico do IP, qualidade do número ou mudanças abruptas nas políticas da Meta.</p>
 
                       <h3 className="text-slate-900 font-bold text-lg mt-8">4. ISENÇÃO TOTAL DE RESPONSABILIDADE</h3>
                       <p className="text-red-600 font-medium"><strong>4.1. O CHIP DO BLACK, SEUS CRIADORES, DESENVOLVEDORES E REPRESENTANTES ESTÃO TOTALMENTE ISENTOS DE QUALQUER RESPONSABILIDADE CIVIL, MATERIAL OU MORAL DECORRENTE DE:</strong></p>
                       <ul className="list-disc pl-5 space-y-2">
-                        <li>Bloqueio temporário ou banimento permanente de números de WhatsApp (chips) conectados à nossa automação;</li>
+                        <li>Bloqueio temporário ou banimento permanente de números de WhatsApp conectados à nossa automação;</li>
                         <li>Perda de contatos, histórico de conversas, leads ou dados armazenados nos números afetados;</li>
                         <li>Prejuízos financeiros, lucros cessantes, perda de vendas ou danos à imagem da empresa do usuário decorrentes da indisponibilidade do número de WhatsApp;</li>
-                        <li>Custos associados à aquisição de novos chips (SIM cards) para reposição.</li>
+                        <li>Custos associados à aquisição de novos números (SIM cards) para reposição.</li>
                       </ul>
 
                       <h3 className="text-slate-900 font-bold text-lg mt-8">5. DECLARAÇÃO DE CIÊNCIA E ACEITE</h3>
-                      <p className="mb-8">Ao preencher seu nome e marcar a caixa de seleção abaixo, o usuário firma este termo eletronicamente, declarando de forma irrevogável e irretratável que:<br/><br/><em className="text-slate-500">"Compreendo perfeitamente que operar com automação no WhatsApp envolve riscos calculados. Assumo total e exclusiva responsabilidade pelos números (chips) que conectarei ao sistema CHIP DO BLACK, isentando a plataforma de qualquer ônus em caso de bloqueios ou perdas."</em></p>
+                      <p className="mb-8">Ao preencher seu nome e marcar a caixa de seleção abaixo, o usuário firma este termo eletronicamente, declarando de forma irrevogável e irretratável que:<br/><br/><em className="text-slate-500">"Compreendo perfeitamente que operar com automação no WhatsApp envolve riscos calculados. Assumo total e exclusiva responsabilidade pelos números que conectarei ao sistema CHIP DO BLACK, isentando a plataforma de qualquer ônus em caso de bloqueios ou perdas."</em></p>
 
                       {/* Signature Area at the bottom of the scrollable content */}
                       <div className="mt-12 pt-8 border-t border-slate-200 space-y-6 bg-slate-50 -mx-5 md:-mx-8 -mb-5 md:-mb-8 p-5 md:p-8">
@@ -534,7 +564,7 @@ export default function App() {
                             <CheckCircle2 className="absolute w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
                           </div>
                           <span className="text-sm text-slate-600 group-hover:text-slate-800 transition-colors leading-relaxed">
-                            Declaro que li integralmente o Termo de Responsabilidade acima, compreendo os riscos de bloqueio inerentes ao uso de API Não Oficial e <strong>isento totalmente o CHIP DO BLACK de qualquer responsabilidade</strong> sobre a perda de chips ou prejuízos decorrentes.
+                            Declaro que li integralmente o Termo de Responsabilidade acima, compreendo os riscos de bloqueio inerentes ao uso de API Não Oficial e <strong>isento totalmente o CHIP DO BLACK de qualquer responsabilidade</strong> sobre a perda de números ou prejuízos decorrentes.
                           </span>
                         </label>
 
@@ -554,28 +584,94 @@ export default function App() {
           </>
         );
 
+      case 'lead_capture':
+        return (
+          <motion.div 
+            key="lead_capture"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            className="flex flex-col items-center w-full max-w-xl mx-auto space-y-8"
+          >
+            <div className="text-center space-y-4">
+              <h2 className="text-2xl md:text-3xl font-bold text-white">
+                Quase lá!
+              </h2>
+              <p className="transition-colors duration-1000" style={{ color: 'var(--theme-color-light)' }}>
+                Preencha seus dados para liberar sua oferta exclusiva.
+              </p>
+            </div>
+            
+            <div className="w-full bg-slate-900/50 border border-slate-700 rounded-2xl p-6 md:p-8 space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-2">Nome Completo</label>
+                  <input 
+                    type="text" 
+                    value={leadName}
+                    onChange={(e) => setLeadName(e.target.value)}
+                    placeholder="Seu nome"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none transition-colors duration-1000 focus:ring-1"
+                    style={{ '--tw-ring-color': 'var(--theme-color)' } as React.CSSProperties}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-2">E-mail</label>
+                  <input 
+                    type="email" 
+                    value={leadEmail}
+                    onChange={(e) => setLeadEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none transition-colors duration-1000 focus:ring-1"
+                    style={{ '--tw-ring-color': 'var(--theme-color)' } as React.CSSProperties}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-2">WhatsApp Principal</label>
+                  <input 
+                    type="tel" 
+                    value={leadPhone}
+                    onChange={(e) => setLeadPhone(e.target.value)}
+                    placeholder="(00) 00000-0000"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none transition-colors duration-1000 focus:ring-1"
+                    style={{ '--tw-ring-color': 'var(--theme-color)' } as React.CSSProperties}
+                  />
+                </div>
+              </div>
+
+              <button 
+                onClick={nextStep}
+                disabled={!leadName || !leadEmail || !leadPhone}
+                className="w-full py-4 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed rounded-xl font-bold text-white transition-all disabled:shadow-none flex items-center justify-center gap-2"
+                style={(!leadName || !leadEmail || !leadPhone) ? {} : { backgroundColor: 'var(--theme-color)', boxShadow: '0 0 20px var(--theme-glow)' }}
+              >
+                VER PLANOS <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+        );
+
       case 'checkout_redirect': {
-        const chips = answers['chips_to_warm'] || 'Até 2 chips';
-        const isCustom = chips === 'Acima de 8 chips';
+        const chips = answers['chips_to_warm'] || 'Até 2 números';
         
         let plans = [];
         let extraInstancePrice = 0;
 
-        if (chips === 'Até 2 chips') {
+        if (chips === 'Até 2 números') {
           plans = [
             { name: 'Essencial', days: '3 dias', price: 47 },
             { name: 'Profissional', days: '5 dias', price: 77 },
             { name: 'Intensivo', days: '7 dias', price: 107 }
           ];
           extraInstancePrice = 27;
-        } else if (chips === 'Até 4 chips') {
+        } else if (chips === 'Até 4 números') {
           plans = [
             { name: 'Essencial', days: '3 dias', price: 87 },
             { name: 'Profissional', days: '5 dias', price: 117 },
             { name: 'Intensivo', days: '7 dias', price: 147 }
           ];
           extraInstancePrice = 37;
-        } else if (chips === 'Até 8 chips') {
+        } else if (chips === 'Até 8 números') {
           plans = [
             { name: 'Essencial', days: '3 dias', price: 127 },
             { name: 'Profissional', days: '5 dias', price: 157 },
@@ -594,33 +690,21 @@ export default function App() {
             <div className="space-y-4">
               <h2 className="text-3xl md:text-4xl font-bold text-white">Tudo Pronto!</h2>
               <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-                {isCustom 
-                  ? "Para volumes acima de 8 chips fazemos um aquecimento personalizado para garantir segurança máxima."
-                  : `Sua operação está prestes a subir de nível. Baseado na sua escolha de ${chips}, veja os planos ideais para você:`}
+                Sua operação está prestes a subir de nível. Baseado na sua escolha de {chips}, veja os planos ideais para você:
               </p>
             </div>
 
-            {isCustom ? (
-              <div className="bg-slate-900/50 border border-slate-700 rounded-2xl p-8 max-w-lg w-full mt-8">
-                <button 
-                  onClick={() => alert("Redirecionando para o WhatsApp...")}
-                  className="w-full py-5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 rounded-xl font-black text-xl text-white shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] transition-all transform hover:-translate-y-1"
-                >
-                  FALAR COM UM ESPECIALISTA
-                </button>
-              </div>
-            ) : (
-              <div className="w-full space-y-8 mt-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="w-full space-y-8 mt-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {plans.map((plan, idx) => (
-                    <div key={idx} className={`bg-slate-900 border ${plan.name === 'Profissional' ? 'border-cyan-500 shadow-[0_0_30px_rgba(0,240,255,0.15)] md:-translate-y-4' : 'border-slate-700'} rounded-2xl p-6 md:p-8 flex flex-col relative transition-transform`}>
+                    <div key={idx} className={`bg-slate-900 border ${plan.name === 'Profissional' ? 'md:-translate-y-4' : 'border-slate-700'} rounded-2xl p-6 md:p-8 flex flex-col relative transition-transform duration-1000`} style={plan.name === 'Profissional' ? { borderColor: 'var(--theme-color)', boxShadow: '0 0 30px var(--theme-glow)' } : {}}>
                       {plan.name === 'Profissional' && (
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-cyan-500 text-slate-900 text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider">
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-slate-900 text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider transition-colors duration-1000" style={{ backgroundColor: 'var(--theme-color)' }}>
                           Mais Escolhido
                         </div>
                       )}
                       <h3 className="text-2xl font-bold text-white mb-1">{plan.name}</h3>
-                      <p className="text-cyan-400 font-medium mb-6">Aquecimento de {plan.days}</p>
+                      <p className="font-medium mb-6 transition-colors duration-1000" style={{ color: 'var(--theme-color-light)' }}>Aquecimento de {plan.days}</p>
                       
                       <div className="mb-8">
                         <span className="text-sm text-slate-400">R$</span>
@@ -629,22 +713,23 @@ export default function App() {
 
                       <ul className="space-y-4 mb-8 text-left text-sm text-slate-300 flex-1">
                         <li className="flex items-center gap-3">
-                          <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                          <CheckCircle2 className="w-5 h-5 shrink-0 transition-colors duration-1000" style={{ color: 'var(--theme-color)' }} />
                           <span>Aquecimento inteligente</span>
                         </li>
                         <li className="flex items-center gap-3">
-                          <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                          <CheckCircle2 className="w-5 h-5 shrink-0 transition-colors duration-1000" style={{ color: 'var(--theme-color)' }} />
                           <span>Suporte especializado</span>
                         </li>
                         <li className="flex items-center gap-3">
-                          <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                          <CheckCircle2 className="w-5 h-5 shrink-0 transition-colors duration-1000" style={{ color: 'var(--theme-color)' }} />
                           <span>{chips}</span>
                         </li>
                       </ul>
 
                       <button 
                         onClick={() => alert(`Redirecionando para o Checkout do plano ${plan.name}...`)}
-                        className={`w-full py-4 rounded-xl font-bold transition-all ${plan.name === 'Profissional' ? 'bg-cyan-500 hover:bg-cyan-400 text-slate-900 shadow-lg' : 'bg-slate-800 hover:bg-slate-700 text-white'}`}
+                        className={`w-full py-4 rounded-xl font-bold transition-all ${plan.name === 'Profissional' ? 'text-slate-900 shadow-lg' : 'bg-slate-800 hover:bg-slate-700 text-white'}`}
+                        style={plan.name === 'Profissional' ? { backgroundColor: 'var(--theme-color)' } : {}}
                       >
                         ASSINAR AGORA
                       </button>
@@ -656,13 +741,13 @@ export default function App() {
                   Precisa de mais? Instância adicional por apenas <strong className="text-white">R$ {extraInstancePrice}</strong>.
                 </p>
               </div>
-            )}
 
             <button
               onClick={() => setCurrentStepIndex(STEPS.indexOf('q_chips_to_warm'))}
-              className="mt-8 text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium underline underline-offset-4"
+              className="mt-8 hover:text-white transition-colors text-sm font-medium underline underline-offset-4 duration-1000"
+              style={{ color: 'var(--theme-color-light)' }}
             >
-              Ver outra oferta (Alterar quantidade de chips)
+              Ver outra oferta (Alterar quantidade de números)
             </button>
           </motion.div>
         );
@@ -674,12 +759,18 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050b14] text-slate-50 overflow-hidden relative font-sans selection:bg-cyan-500/30">
+    <div 
+      className="min-h-screen text-slate-50 overflow-hidden relative font-sans transition-colors duration-1000 selection:bg-white/20"
+      style={{ 
+        backgroundColor: 'var(--theme-bg)',
+        ...getThemeVars(currentStepIndex)
+      } as React.CSSProperties}
+    >
       {/* Dynamic Background Elements */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 blur-[120px] rounded-full mix-blend-screen"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-600/10 blur-[120px] rounded-full mix-blend-screen"></div>
-        <div className="absolute top-[40%] left-[60%] w-[20%] h-[20%] bg-indigo-600/10 blur-[100px] rounded-full mix-blend-screen"></div>
+      <div className="fixed inset-0 z-0 pointer-events-none transition-colors duration-1000">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] blur-[120px] rounded-full mix-blend-screen transition-colors duration-1000" style={{ backgroundColor: 'var(--theme-glow)' }}></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] blur-[120px] rounded-full mix-blend-screen transition-colors duration-1000" style={{ backgroundColor: 'var(--theme-glow)' }}></div>
+        <div className="absolute top-[40%] left-[60%] w-[20%] h-[20%] blur-[100px] rounded-full mix-blend-screen transition-colors duration-1000" style={{ backgroundColor: 'var(--theme-glow-strong)' }}></div>
         
         {/* Grid overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjAyKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50"></div>
@@ -692,13 +783,14 @@ export default function App() {
           <header className="w-full p-6 max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-4">
               <Logo className="scale-50 origin-left -ml-4" />
-              <div className="text-xs font-bold text-cyan-500 tracking-widest uppercase">
+              <div className="text-xs font-bold tracking-widest uppercase transition-colors duration-1000" style={{ color: 'var(--theme-color)' }}>
                 Passo {currentStepIndex} de {STEPS.length - 1}
               </div>
             </div>
-            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-slate-800/50 rounded-full overflow-hidden">
               <motion.div 
-                className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 shadow-[0_0_10px_rgba(0,240,255,0.5)]"
+                className="h-full transition-colors duration-1000"
+                style={{ backgroundColor: 'var(--theme-color)', boxShadow: '0 0 10px var(--theme-glow-strong)' }}
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -754,20 +846,33 @@ const QuestionStep: React.FC<{
               key={idx}
               onClick={() => onSelect(option)}
               className={`
-                relative w-full p-5 rounded-xl border text-left transition-all duration-200 overflow-hidden group
+                relative w-full p-5 rounded-xl border text-left transition-all duration-300 overflow-hidden group
                 ${isSelected 
-                  ? 'bg-blue-900/40 border-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.2)]' 
-                  : 'bg-slate-900/50 border-slate-700 hover:border-blue-500/50 hover:bg-slate-800/80'
+                  ? 'bg-slate-900/80' 
+                  : 'bg-slate-900/50 border-slate-700 hover:bg-slate-800/80'
                 }
               `}
+              style={isSelected ? {
+                borderColor: 'var(--theme-color)',
+                boxShadow: '0 0 20px var(--theme-glow)'
+              } : {}}
             >
-              <div className={`absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? 'opacity-100' : ''}`}></div>
+              <div 
+                className={`absolute inset-0 transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}
+                style={{ background: 'linear-gradient(to right, var(--theme-glow-light), transparent)' }}
+              ></div>
               <div className="relative flex items-center justify-between">
-                <span className={`font-medium text-lg ${isSelected ? 'text-cyan-300' : 'text-slate-200 group-hover:text-white'}`}>
+                <span 
+                  className={`font-medium text-lg transition-colors duration-300 ${isSelected ? '' : 'text-slate-200 group-hover:text-white'}`}
+                  style={isSelected ? { color: 'var(--theme-color-light)' } : {}}
+                >
                   {option}
                 </span>
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'border-cyan-400' : 'border-slate-600 group-hover:border-blue-400'}`}>
-                  {isSelected && <div className="w-3 h-3 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(0,240,255,0.8)]" />}
+                <div 
+                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-300`}
+                  style={isSelected ? { borderColor: 'var(--theme-color)' } : { borderColor: 'rgb(71 85 105)' }}
+                >
+                  {isSelected && <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'var(--theme-color)', boxShadow: '0 0 10px var(--theme-glow-strong)' }} />}
                 </div>
               </div>
             </button>
