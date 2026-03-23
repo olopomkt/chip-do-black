@@ -43,6 +43,17 @@ export default function App() {
   const [leadName, setLeadName] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
+  const [leadId] = useState(() => crypto.randomUUID());
+  const [userIp, setUserIp] = useState('');
+  const [clickedOffers, setClickedOffers] = useState<Set<string>>(new Set());
+  const [hasSentLeadWebhook, setHasSentLeadWebhook] = useState(false);
+
+  React.useEffect(() => {
+    fetch('https://api.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => setUserIp(data.ip))
+      .catch(() => setUserIp('unknown'));
+  }, []);
 
   const currentStep = STEPS[currentStepIndex];
   const progress = (currentStepIndex / (STEPS.length - 1)) * 100;
@@ -119,6 +130,42 @@ export default function App() {
   const handleAnswer = (questionId: string, answer: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: answer }));
     setTimeout(nextStep, 400);
+  };
+
+  const sendWebhook = async (offerName?: string, offerPrice?: number, offerDays?: string) => {
+    const payload = {
+      id_lead: leadId,
+      ip_usuario: userIp,
+      nome: leadName,
+      email: leadEmail,
+      telefone: leadPhone,
+      perfil_atuacao: answers['role'],
+      foco_operacao: answers['operation_type'],
+      numeros_aquecidos_atualmente: answers['chips_current'],
+      dias_aquecimento_desejado: answers['warmup_days'],
+      frequencia_aquecimento: answers['frequency'],
+      quantidade_numeros_desejada: answers['chips_to_warm'],
+      termo_aceito: termsAccepted,
+      nome_assinatura_termo: termsName,
+      data_hora: new Date().toISOString(),
+      oferta_selecionada: offerName ? {
+        nome: offerName,
+        preco: offerPrice,
+        dias: offerDays
+      } : null
+    };
+
+    try {
+      await fetch('https://webhook.infinityacademyb2b.com.br/webhook/cdb-leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (error) {
+      console.error('Erro ao enviar webhook:', error);
+    }
   };
 
   const renderStep = () => {
@@ -644,7 +691,13 @@ export default function App() {
               </div>
 
               <button 
-                onClick={nextStep}
+                onClick={() => {
+                  if (!hasSentLeadWebhook) {
+                    sendWebhook();
+                    setHasSentLeadWebhook(true);
+                  }
+                  nextStep();
+                }}
                 disabled={!leadName || !leadEmail || !leadPhone}
                 className="w-full py-4 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed rounded-xl font-bold text-white transition-all disabled:shadow-none flex items-center justify-center gap-2"
                 style={(!leadName || !leadEmail || !leadPhone) ? {} : { backgroundColor: 'var(--theme-color)', boxShadow: '0 0 20px var(--theme-glow)' }}
@@ -728,7 +781,14 @@ export default function App() {
                       </ul>
 
                       <button 
-                        onClick={() => window.location.href = plan.link}
+                        onClick={async () => {
+                          const offerKey = `${plan.name}-${plan.days}`;
+                          if (!clickedOffers.has(offerKey)) {
+                            await sendWebhook(plan.name, plan.price, plan.days);
+                            setClickedOffers(prev => new Set(prev).add(offerKey));
+                          }
+                          window.location.href = plan.link;
+                        }}
                         className={`w-full py-4 rounded-xl font-bold transition-all ${plan.name === 'Profissional' ? 'text-slate-900 shadow-lg' : 'bg-slate-800 hover:bg-slate-700 text-white'}`}
                         style={plan.name === 'Profissional' ? { backgroundColor: 'var(--theme-color)' } : {}}
                       >
