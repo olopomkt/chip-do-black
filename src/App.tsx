@@ -45,8 +45,10 @@ export default function App() {
   const [leadPhone, setLeadPhone] = useState('');
   const [leadId] = useState(() => crypto.randomUUID());
   const [userIp, setUserIp] = useState('');
-  const [clickedOffers, setClickedOffers] = useState<Set<string>>(new Set());
-  const [hasSentLeadWebhook, setHasSentLeadWebhook] = useState(false);
+
+  const hasSentWebhook = React.useRef(false);
+  const hasReachedCheckout = React.useRef(false);
+  const payloadData = React.useRef<any>({});
 
   React.useEffect(() => {
     fetch('https://api.ipify.org?format=json')
@@ -54,6 +56,24 @@ export default function App() {
       .then(data => setUserIp(data.ip))
       .catch(() => setUserIp('unknown'));
   }, []);
+
+  React.useEffect(() => {
+    payloadData.current = {
+      id_lead: leadId,
+      ip_usuario: userIp,
+      nome: leadName,
+      email: leadEmail,
+      telefone: leadPhone,
+      perfil_atuacao: answers['role'],
+      foco_operacao: answers['operation_type'],
+      numeros_aquecidos_atualmente: answers['chips_current'],
+      dias_aquecimento_desejado: answers['warmup_days'],
+      frequencia_aquecimento: answers['frequency'],
+      quantidade_numeros_desejada: answers['chips_to_warm'],
+      termo_aceito: termsAccepted,
+      nome_assinatura_termo: termsName,
+    };
+  }, [leadId, userIp, leadName, leadEmail, leadPhone, answers, termsAccepted, termsName]);
 
   const currentStep = STEPS[currentStepIndex];
   const progress = (currentStepIndex / (STEPS.length - 1)) * 100;
@@ -132,21 +152,12 @@ export default function App() {
     setTimeout(nextStep, 400);
   };
 
-  const sendWebhook = async (offerName?: string, offerPrice?: number, offerDays?: string) => {
+  const sendWebhook = React.useCallback(async (offerName?: string, offerPrice?: number, offerDays?: string) => {
+    if (hasSentWebhook.current) return;
+    hasSentWebhook.current = true;
+
     const payload = {
-      id_lead: leadId,
-      ip_usuario: userIp,
-      nome: leadName,
-      email: leadEmail,
-      telefone: leadPhone,
-      perfil_atuacao: answers['role'],
-      foco_operacao: answers['operation_type'],
-      numeros_aquecidos_atualmente: answers['chips_current'],
-      dias_aquecimento_desejado: answers['warmup_days'],
-      frequencia_aquecimento: answers['frequency'],
-      quantidade_numeros_desejada: answers['chips_to_warm'],
-      termo_aceito: termsAccepted,
-      nome_assinatura_termo: termsName,
+      ...payloadData.current,
       data_hora: new Date().toISOString(),
       oferta_selecionada: offerName ? {
         nome: offerName,
@@ -161,12 +172,35 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        keepalive: true
       });
     } catch (error) {
       console.error('Erro ao enviar webhook:', error);
     }
-  };
+  }, []);
+
+  React.useEffect(() => {
+    const handleExit = () => {
+      if (hasReachedCheckout.current && !hasSentWebhook.current) {
+        sendWebhook();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        handleExit();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleExit);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleExit);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [sendWebhook]);
 
   const renderStep = () => {
     switch (currentStep) {
@@ -692,10 +726,7 @@ export default function App() {
 
               <button 
                 onClick={() => {
-                  if (!hasSentLeadWebhook) {
-                    sendWebhook();
-                    setHasSentLeadWebhook(true);
-                  }
+                  hasReachedCheckout.current = true;
                   nextStep();
                 }}
                 disabled={!leadName || !leadEmail || !leadPhone}
@@ -782,11 +813,7 @@ export default function App() {
 
                       <button 
                         onClick={async () => {
-                          const offerKey = `${plan.name}-${plan.days}`;
-                          if (!clickedOffers.has(offerKey)) {
-                            await sendWebhook(plan.name, plan.price, plan.days);
-                            setClickedOffers(prev => new Set(prev).add(offerKey));
-                          }
+                          await sendWebhook(plan.name, plan.price, plan.days);
                           window.location.href = plan.link;
                         }}
                         className={`w-full py-4 rounded-xl font-bold transition-all ${plan.name === 'Profissional' ? 'text-slate-900 shadow-lg' : 'bg-slate-800 hover:bg-slate-700 text-white'}`}
