@@ -187,18 +187,13 @@ export default function App() {
       }
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        handleExit();
-      }
-    };
-
+    // Usando apenas eventos que indicam o encerramento definitivo da sessão/aba
     window.addEventListener('beforeunload', handleExit);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handleExit);
 
     return () => {
       window.removeEventListener('beforeunload', handleExit);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handleExit);
     };
   }, [sendWebhook]);
 
