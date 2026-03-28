@@ -12,7 +12,6 @@ type Step =
   | 'video_explanation'
   | 'api_explanation'
   | 'q_warmup_days'
-  | 'q_frequency'
   | 'q_chips_to_warm'
   | 'terms_agreement'
   | 'lead_capture'
@@ -27,7 +26,6 @@ const STEPS: Step[] = [
   'video_explanation',
   'api_explanation',
   'q_warmup_days',
-  'q_frequency',
   'q_chips_to_warm',
   'terms_agreement',
   'lead_capture',
@@ -45,6 +43,9 @@ export default function App() {
   const [leadPhone, setLeadPhone] = useState('');
   const [leadId] = useState(() => crypto.randomUUID());
   const [userIp, setUserIp] = useState('');
+  const [isFreeTrialLoading, setIsFreeTrialLoading] = useState(false);
+  const [freeTrialStep, setFreeTrialStep] = useState(0);
+  const [freeTrialComplete, setFreeTrialComplete] = useState(false);
 
   const hasSentWebhook = React.useRef(false);
   const hasReachedCheckout = React.useRef(false);
@@ -68,7 +69,6 @@ export default function App() {
       foco_operacao: answers['operation_type'],
       numeros_aquecidos_atualmente: answers['chips_current'],
       dias_aquecimento_desejado: answers['warmup_days'],
-      frequencia_aquecimento: answers['frequency'],
       quantidade_numeros_desejada: answers['chips_to_warm'],
       termo_aceito: termsAccepted,
       nome_assinatura_termo: termsName,
@@ -457,19 +457,6 @@ export default function App() {
           selected={answers['warmup_days']}
         />;
 
-      case 'q_frequency':
-        return <QuestionStep 
-          key="q_frequency"
-          question="Qual a frequência de mensagens?"
-          options={[
-            "Rápido (Risco Alto)",
-            "Neutro (Risco Moderado)",
-            "Sem Pressa (Risco Baixo)"
-          ]}
-          onSelect={(ans) => handleAnswer('frequency', ans)}
-          selected={answers['frequency']}
-        />;
-
       case 'q_chips_to_warm':
         return <QuestionStep 
           key="q_chips_to_warm"
@@ -760,6 +747,67 @@ export default function App() {
           ];
         }
 
+        if (isFreeTrialLoading) {
+          const loadingTexts = [
+            "Processando seus dados...",
+            "Enviando informações ao servidor...",
+            "Criando sua conta...",
+            "Validando tudo...",
+            "PRONTO, SUA CONTA FOI CRIADA, VOCE TEM 1 DIA GRÁTIS COMEÇANDO POR AGORA."
+          ];
+
+          return (
+            <motion.div 
+              key="free_trial_loading"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col items-center text-center w-full max-w-2xl mx-auto space-y-8"
+            >
+              {!freeTrialComplete ? (
+                <>
+                  <div className="w-20 h-20 border-4 border-slate-700 border-t-cyan-500 rounded-full animate-spin mb-4"></div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white transition-all duration-500">
+                    {loadingTexts[freeTrialStep]}
+                  </h2>
+                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden mt-8">
+                    <motion.div 
+                      className="h-full bg-cyan-500"
+                      initial={{ width: '0%' }}
+                      animate={{ width: `${(freeTrialStep / 4) * 100}%` }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-emerald-400">
+                    {loadingTexts[4]}
+                  </h2>
+                  <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 md:p-8 space-y-4 mt-8">
+                    <h3 className="text-xl font-bold text-white">Para Começar:</h3>
+                    <p className="text-slate-300">
+                      Abra seu Email, Verifique seu login e senha enviados, acesse o painel e faça o login.
+                    </p>
+                    <button 
+                      onClick={() => window.location.href = 'https://painel.chipdoblack.online'}
+                      className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 rounded-xl font-bold text-white transition-all mt-6 shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+                    >
+                      ACESSAR PAINEL AGORA
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          );
+        }
+
         return (
           <motion.div 
             key="checkout_redirect"
@@ -816,6 +864,11 @@ export default function App() {
                       >
                         ASSINAR AGORA
                       </button>
+                      <div className="mt-4 text-left text-xs text-slate-400 space-y-1">
+                        <p>✅ Todos os planos iniciam com frequência Neutro por segurança.</p>
+                        <p>⚡ Faça upgrade de frequência quando quiser pelo painel</p>
+                        <p>🔒 Pagamento 100% seguro</p>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -823,6 +876,60 @@ export default function App() {
                 <p className="text-slate-400 text-sm mt-8">
                   Precisa de mais? Instância adicional por apenas <strong className="text-white">R$ {extraInstancePrice}</strong>.
                 </p>
+
+                {/* Free Trial Section */}
+                <div className="w-full mt-12 pt-8 border-t border-slate-800/50">
+                  <p className="text-sm text-slate-400 mb-4">Ainda não tem certeza?</p>
+                  <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4 text-left">
+                      <div className="text-4xl">🎁</div>
+                      <div>
+                        <h4 className="text-xl font-bold text-white">Teste grátis por 1 dia</h4>
+                        <p className="text-slate-400 text-sm">Sem cartão de crédito. Apenas 1 vez por pessoa.</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={async () => {
+                        setIsFreeTrialLoading(true);
+                        setFreeTrialStep(0);
+                        
+                        // Simulate loading steps
+                        const steps = 4;
+                        for (let i = 1; i <= steps; i++) {
+                          await new Promise(resolve => setTimeout(resolve, 1500));
+                          setFreeTrialStep(i);
+                        }
+
+                        // Send webhook
+                        const payload = {
+                          ...payloadData.current,
+                          data_hora: new Date().toISOString(),
+                          oferta_selecionada: {
+                            nome: 'teste-gratis'
+                          }
+                        };
+
+                        try {
+                          await fetch('https://webhook.infinityacademyb2b.com.br/webhook/cadastro-teste', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(payload),
+                            keepalive: true
+                          });
+                        } catch (error) {
+                          console.error('Erro ao enviar webhook de teste grátis:', error);
+                        }
+
+                        setFreeTrialComplete(true);
+                      }}
+                      className="px-6 py-3 rounded-xl font-bold text-white border border-slate-600 hover:bg-slate-700 transition-all whitespace-nowrap"
+                    >
+                      QUERO TESTAR GRÁTIS →
+                    </button>
+                  </div>
+                </div>
               </div>
 
             <button
