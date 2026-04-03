@@ -319,12 +319,17 @@ export default function App() {
               </p>
             </div>
             
-            <div className="w-full max-w-[320px] md:max-w-none aspect-[9/16] md:aspect-video bg-slate-900/80 rounded-2xl border border-slate-700 md:border-blue-500/30 shadow-lg md:shadow-[0_0_30px_rgba(0,85,255,0.15)] flex items-center justify-center relative overflow-hidden group mx-auto">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-cyan-500/5 md:from-blue-600/20 md:to-cyan-500/10"></div>
-              <PlayCircle className="w-16 h-16 md:w-20 md:h-20 text-cyan-400 opacity-80 group-hover:scale-110 group-hover:opacity-100 transition-all duration-300" />
-              <div className="absolute bottom-4 left-4 right-4 text-center text-xs md:text-sm text-slate-400">
-                [ Vídeo Explicativo será inserido aqui ]
-              </div>
+            <div className="w-full aspect-video bg-slate-900/80 rounded-2xl border border-slate-700 md:border-blue-500/30 shadow-lg md:shadow-[0_0_30px_rgba(0,85,255,0.15)] relative overflow-hidden mx-auto">
+              <iframe 
+                width="100%" 
+                height="100%" 
+                src="https://www.youtube.com/embed/ChvAvoInAHo?controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3" 
+                title="YouTube video player" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+              ></iframe>
             </div>
 
             <button 
