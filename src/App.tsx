@@ -454,9 +454,9 @@ export default function App() {
           key="q_warmup_days"
           question="Quantos dias você quer ficar aquecendo o número do WhatsApp?"
           options={[
-            "3 dias",
             "5 dias",
-            "7 dias"
+            "7 dias",
+            "10 dias"
           ]}
           onSelect={(ans) => handleAnswer('warmup_days', ans)}
           selected={answers['warmup_days']}
@@ -734,21 +734,21 @@ export default function App() {
 
         if (chips === 'Até 2 números') {
           plans = [
-            { name: 'Essencial', days: '3 dias', price: 47, link: 'https://pagamento.chipdoblack.online/checkout/v5/LwSCReMRQ7YXdI5SL9le' },
-            { name: 'Profissional', days: '5 dias', price: 77, link: 'https://pagamento.chipdoblack.online/checkout/v5/aXLGIx0WApmFENoTcsL5' },
-            { name: 'Intensivo', days: '7 dias', price: 107, link: 'https://pagamento.chipdoblack.online/checkout/v5/nYKFKBYQL5FK8yz26cZp' }
+            { name: 'Essencial', days: '5 dias', price: 47, link: 'https://pagamento.chipdoblack.online/checkout/v5/LwSCReMRQ7YXdI5SL9le' },
+            { name: 'Profissional', days: '7 dias', price: 77, link: 'https://pagamento.chipdoblack.online/checkout/v5/aXLGIx0WApmFENoTcsL5' },
+            { name: 'Intensivo', days: '10 dias', price: 107, link: 'https://pagamento.chipdoblack.online/checkout/v5/nYKFKBYQL5FK8yz26cZp' }
           ];
         } else if (chips === 'Até 4 números') {
           plans = [
-            { name: 'Essencial', days: '3 dias', price: 87, link: 'https://pagamento.chipdoblack.online/checkout/v5/axaqIvUthvrIuVyh3eJB' },
-            { name: 'Profissional', days: '5 dias', price: 117, link: 'https://pagamento.chipdoblack.online/checkout/v5/B72Y927EUI84rSC75po4' },
-            { name: 'Intensivo', days: '7 dias', price: 147, link: 'https://pagamento.chipdoblack.online/checkout/v5/hDU23qRMqC9KYmMawYiJ' }
+            { name: 'Essencial', days: '5 dias', price: 87, link: 'https://pagamento.chipdoblack.online/checkout/v5/axaqIvUthvrIuVyh3eJB' },
+            { name: 'Profissional', days: '7 dias', price: 117, link: 'https://pagamento.chipdoblack.online/checkout/v5/B72Y927EUI84rSC75po4' },
+            { name: 'Intensivo', days: '10 dias', price: 147, link: 'https://pagamento.chipdoblack.online/checkout/v5/hDU23qRMqC9KYmMawYiJ' }
           ];
         } else if (chips === 'Até 8 números') {
           plans = [
-            { name: 'Essencial', days: '3 dias', price: 127, link: 'https://pagamento.chipdoblack.online/checkout/v5/4PVri6x63Io43wfySZVe' },
-            { name: 'Profissional', days: '5 dias', price: 157, link: 'https://pagamento.chipdoblack.online/checkout/v5/4IFehiQFKsXVTn8Bi0oH' },
-            { name: 'Intensivo', days: '7 dias', price: 187, link: 'https://pagamento.chipdoblack.online/checkout/v5/wroWzragzSkYLZDXvZuv' }
+            { name: 'Essencial', days: '5 dias', price: 127, link: 'https://pagamento.chipdoblack.online/checkout/v5/4PVri6x63Io43wfySZVe' },
+            { name: 'Profissional', days: '7 dias', price: 157, link: 'https://pagamento.chipdoblack.online/checkout/v5/4IFehiQFKsXVTn8Bi0oH' },
+            { name: 'Intensivo', days: '10 dias', price: 187, link: 'https://pagamento.chipdoblack.online/checkout/v5/wroWzragzSkYLZDXvZuv' }
           ];
         }
 
